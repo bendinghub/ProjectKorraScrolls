@@ -5,7 +5,9 @@ import com.projectkorra.cozmyc.pkscrolls.models.Scroll;
 import com.projectkorra.cozmyc.pkscrolls.utils.ColorUtils;
 import com.projectkorra.cozmyc.pkscrolls.utils.ScrollItemFactory;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.ability.ComboAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
+import com.projectkorra.projectkorra.ability.PassiveAbility;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -131,29 +133,31 @@ public class ScrollConsumeListener implements Listener {
 
                 int currentSlot = bPlayer.getCurrentSlot() + 1;
 
-                if (bPlayer.getAbilities().get(currentSlot) == null) {
-                    if (bPlayer.hasElement(scroll.getElement())) {
-                        bPlayer.bindAbility(scroll.getAbilityName(), currentSlot);
-                    }
+                if (!ability.isHiddenAbility() && !(ability instanceof PassiveAbility) && !(ability instanceof ComboAbility)) { // Don't bind unbindable abilities
+                    if (bPlayer.getAbilities().get(currentSlot) == null) {
+                        if (bPlayer.hasElement(scroll.getElement())) {
+                            bPlayer.bindAbility(scroll.getAbilityName(), currentSlot);
+                        }
 
-                    String boundMessage = scroll.getAbilityBoundMessage();
-                    if (boundMessage == null) {
-                        boundMessage = plugin.getConfigManager().getMessage("abilityBound");
+                        String boundMessage = scroll.getAbilityBoundMessage();
+                        if (boundMessage == null) {
+                            boundMessage = plugin.getConfigManager().getMessage("abilityBound");
+                        }
+                        player.sendMessage(ColorUtils.formatMessage(
+                                boundMessage,
+                                "ability", scroll.getDisplayName(),
+                                "slot", String.valueOf(currentSlot)
+                        ));
+                    } else {
+                        String slotMessage = scroll.getSlotAlreadyBoundMessage();
+                        if (slotMessage == null) {
+                            slotMessage = plugin.getConfigManager().getMessage("slotAlreadyBound");
+                        }
+                        player.sendMessage(ColorUtils.formatMessage(
+                                slotMessage,
+                                "ability", scroll.getDisplayName()
+                        ));
                     }
-                    player.sendMessage(ColorUtils.formatMessage(
-                            boundMessage,
-                            "ability", scroll.getDisplayName(),
-                            "slot", String.valueOf(currentSlot)
-                    ));
-                } else {
-                    String slotMessage = scroll.getSlotAlreadyBoundMessage();
-                    if (slotMessage == null) {
-                        slotMessage = plugin.getConfigManager().getMessage("slotAlreadyBound");
-                    }
-                    player.sendMessage(ColorUtils.formatMessage(
-                            slotMessage,
-                            "ability", scroll.getDisplayName()
-                    ));
                 }
             } else {
                 int required = scroll.getUnlockCount();
